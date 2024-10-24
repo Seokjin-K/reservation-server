@@ -1,0 +1,70 @@
+// springBootVersion 및 dependencyManagementVersion을 정의합니다. 이 변수들은 후속 블록에서 버전 관리에 사용됩니다.
+buildscript {
+    ext {
+        springBootVersion = '2.7.14'
+        dependencyManagementVersion = '1.0.15.RELEASE'
+    }
+}
+
+/* org.springframework.boot 및 io.spring.dependency-management 플러그인을 추가하고
+apply false를 사용하여 해당 플러그인을 현재 프로젝트에 적용하지 않고, 이후 subprojects 블록에서 서브 프로젝트들에 적용하도록 설정합니다.
+java 플러그인을 추가하여 Java 프로젝트임을 명시합니다. */
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootVersion}" apply false
+    id 'io.spring.dependency-management' version "${dependencyManagementVersion}" apply false
+}
+
+allprojects {
+    group = 'com.reservation-server'
+    version = '0.0.1-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply {
+        plugin("java")
+        plugin("org.springframework.boot")
+        plugin("io.spring.dependency-management")
+    }
+
+    java {
+        /* 이 설정은 프로젝트의 소스 코드가 Java 11을 사용하여 컴파일되도록 지정합니다.
+        즉, Java 11 기능과 구문을 사용할 수 있습니다. */
+        sourceCompatibility = '11'
+
+        /* 이 설정은 생성된 바이트코드가 Java 11 JVM과 호환되도록 지정합니다.
+        즉, 이 코드를 실행하려면 Java 11 이상을 지원하는 JVM이 필요합니다. */
+        targetCompatibility = '11'
+    }
+
+    configurations {
+        // 컴파일할 때만 사용되는 의존성을 지정하는 구성을 의미합니다.
+        compileOnly {
+            /* extendsFrom 키워드는 특정 구성(compileOnly)이 다른 구성(annotationProcessor)의 모든 의존성을 상속받도록 설정합니다.
+            annotationProcessor는 컴파일 시에 어노테이션을 처리하는 라이브러리나 도구들을 지정하는 구성입니다.
+            예를 들어, Lombok과 같은 어노테이션 프로세서는 컴파일러가 코드에서 특정 어노테이션을 보고
+            자동으로 필요한 코드(예: Getter, Setter 메소드 등)를 생성하도록 합니다.
+            compileOnly가 annotationProcessor로부터 확장된다는 것은 compileOnly가 포함하는 의존성들이
+            컴파일 시에 필요한 애노테이션 프로세싱에도 사용된다는 의미입니다. */
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencies {
+        // Lombok
+        // Lombok 라이브러리를 컴파일 시에만 사용하고, annotationProcessor로 지정하여 컴파일 타임에 애너테이션 처리를 수행합니다.
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        // Test
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}

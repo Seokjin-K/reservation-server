@@ -1,0 +1,6 @@
+rootProject.name = 'reservation-server'
+include 'api'
+include 'core'
+include 'infrastructure'
+include 'server'
+
